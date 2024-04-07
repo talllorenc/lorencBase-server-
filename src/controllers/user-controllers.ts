@@ -17,7 +17,7 @@ export const UserController = {
       const existingUser = await UserModel.findOne({ email });
       if (existingUser) {
         return res.status(400).json({
-          message: "An account with such a email has already been registered",
+          error: "An account with such a email has already been registered",
         });
       }
 
@@ -38,7 +38,7 @@ export const UserController = {
 
       res.status(200).json({ token });
     } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ error: "Internal server error" });
     }
   },
   login: async (req: Request, res: Response) => {
@@ -56,7 +56,7 @@ export const UserController = {
       if (!isValidPassword) {
         return res
           .status(401)
-          .json({ message: "Invalid username or password" });
+          .json({ error: "Invalid username or password" });
       }
 
       const token = jwt.sign(
@@ -81,7 +81,7 @@ export const UserController = {
 
       if (!user) {
         return res.status(404).json({
-          message: "The user was not found",
+          error: "The user was not found",
         });
       }
 
