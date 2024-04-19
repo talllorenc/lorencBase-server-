@@ -1,11 +1,20 @@
 import { Request, Response, NextFunction } from "express";
 import { body, validationResult } from "express-validator";
+import { UserModel } from "../models/User";
 
 const registrationValidator = [
-  body("email").isEmail().withMessage("Invalid email"),
+  body("email")
+    .isEmail()
+    .withMessage("Invalid email")
+    .custom(async (value) => {
+      const existingUser = await UserModel.findOne({ email: value });
+      if (existingUser) {
+        throw new Error("Email is already registered");
+      }
+    }),
   body("name")
     .isLength({ min: 5 })
-    .withMessage("Username must be at least 5 characters long"),
+    .withMessage("Name must be at least 5 characters long"),
   body("password")
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters long")
