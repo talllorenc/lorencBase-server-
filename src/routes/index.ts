@@ -5,6 +5,7 @@ import { AuthController } from "../controllers/auth-controllers";
 import { UserController } from "../controllers/user-controllers";
 import { NoteController } from "../controllers/note-controllers";
 import { RecaptchaController } from "../controllers/recaptcha-controller";
+import { helpersController } from "../controllers/helpers-controllers";
 /****************VALIDATORS**********************/
 import loginValidator from "../validators/loginValidator";
 import registrationValidator from "../validators/registerValidarot";
@@ -33,5 +34,6 @@ router.post(
 ); //DONE
 
 router.post("/verify-recaptcha", RecaptchaController.validate); //DONE
+router.get("/helpers/randomPassword", helpersController.randomPassword); 
 
 export default router;
