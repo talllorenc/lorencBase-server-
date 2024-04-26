@@ -24,16 +24,14 @@ const NoteSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    likes: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
   }
 );
-
-NoteSchema.plugin(AutoIncrement, {
-  inc_field: "ticket",
-  id: "ticketNums",
-  start_seq: 500,
-});
 
 export const NoteModel = mongoose.model("Note", NoteSchema);
