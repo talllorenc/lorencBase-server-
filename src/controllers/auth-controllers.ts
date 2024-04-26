@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
 import * as bcrypt from "bcryptjs";
+import asyncHandler from "express-async-handler";
 import { UserModel } from "../models/User";
 
 const jwtSecretKey = process.env.JWT_SECRET;
@@ -60,18 +61,18 @@ export const AuthController = {
           },
         },
         jwtSecretKey,
-        { expiresIn: "15m" }
+        { expiresIn: "10s" }
       );
 
-      const refreshToken = jwt.sign({ name: user.name }, jwtSecretKeyRefresh, {
+      const refreshToken = jwt.sign({ _id: user._id }, jwtSecretKeyRefresh, {
         expiresIn: "7d",
       });
 
       res.cookie("jwt", refreshToken, {
-        httpOnly: true, 
-        secure: true, 
-        sameSite: "none", 
-        maxAge: 7 * 24 * 60 * 60 * 1000, 
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
       res.json({ accessToken });
@@ -80,4 +81,51 @@ export const AuthController = {
       res.status(500).json({ message: "An error occurred while logging in" });
     }
   },
+  refresh: async (req: Request, res: Response) => {
+    try {
+      const cookies = req.cookies;
+
+      if (!cookies?.jwt) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const refreshToken = cookies.jwt;
+
+      jwt.verify(
+        refreshToken,
+        jwtSecretKeyRefresh,
+        async (err: any, decoded: { _id: string }) => {
+          if (err) return res.status(403).json({ message: "Forbidden" });
+
+          const user = await UserModel.findOne({ _id: decoded._id }).exec();
+
+          if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+          const accessToken = jwt.sign(
+            {
+              UserInfo: {
+                _id: user._id,
+                username: user.name,
+                email: user.email,
+                role: user.role,
+              },
+            },
+            jwtSecretKey,
+            { expiresIn: "10s" }
+          );
+
+          res.json({ accessToken });
+        }
+      );
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+  logout: async (req: Request, res: Response) => {
+    const cookies = req.cookies
+    if (!cookies?.jwt) return res.sendStatus(204) 
+    res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
+    res.json({ message: 'Cookie cleared' })
+  }
 };

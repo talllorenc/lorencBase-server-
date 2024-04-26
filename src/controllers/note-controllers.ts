@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 import { NoteModel } from "../models/Note";
-import edjsHTML from "editorjs-html"
+import edjsHTML from "editorjs-html";
 
 const edjsParser = edjsHTML();
-
 
 export const NoteController = {
   getAll: async (req: Request, res: Response) => {
@@ -20,16 +19,55 @@ export const NoteController = {
       res.status(500).json({ message: "Internal server error" });
     }
   },
+  getOneBySlug: async (req: Request, res: Response) => {
+    try {
+      const { slug } = req.params;
+
+      const updatedNote = await NoteModel.findOneAndUpdate(
+        { slug: slug },
+        { $inc: { viewsCount: 1 } },
+        { new: true }
+      );
+
+      if (!updatedNote) {
+        return res.status(404).json({ message: "Note not found" });
+      }
+
+      res.json(updatedNote);
+    } catch (error) {
+      console.error("Error fetching note by id:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+  getOneById: async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const note = await NoteModel.findById(id);
+
+      if (!note) {
+        return res.status(404).json({ message: "Note not found" });
+      }
+
+      res.json(note);
+    } catch (error) {
+      console.error("Error fetching note by id:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
   create: async (req: Request, res: Response) => {
     try {
       const { data, title, tags } = req.body;
 
       const html = edjsParser.parse(data);
 
+      let slug = title.toLocaleLowerCase().trim().replaceAll(" ", "-");
+
       const note = new NoteModel({
         title,
         content: html,
-        tags
+        tags,
+        slug,
       });
 
       await note.save();
@@ -44,7 +82,7 @@ export const NoteController = {
     try {
       const { id } = req.params;
       const note = await NoteModel.findByIdAndDelete(id).lean();
-      if(!note){
+      if (!note) {
         return res.status(404).json({ message: "Note not found" });
       }
 
@@ -66,5 +104,5 @@ export const NoteController = {
       console.log(error);
       res.status(500).json({ message: "Internal server error" });
     }
-  }
+  },
 };

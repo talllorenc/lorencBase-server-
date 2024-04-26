@@ -17,7 +17,7 @@ const checkAuth = (req: IIsAuth, res: Response, next: NextFunction) => {
     next();
   } catch (error) {
     console.error("Error authenticating user:", error);
-    res.status(401).json({ message: "Unauthorized" });
+    res.status(403).json({ message: "Unauthorized" });
   }
 };
 

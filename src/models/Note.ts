@@ -15,6 +15,11 @@ const NoteSchema = new mongoose.Schema(
     tags: {
       type: [String],
     },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     viewsCount: {
       type: Number,
       default: 0,
