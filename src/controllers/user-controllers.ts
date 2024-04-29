@@ -10,7 +10,7 @@ export const UserController = {
   profile: async (req: AuthRequest, res: Response) => {
     try {
       const user = await UserModel.findById(req.userId)
-        .select("-passwordHash")
+        .select("-passwordHash -createdAt -updatedAt")
         .lean();
 
       if (!user) {

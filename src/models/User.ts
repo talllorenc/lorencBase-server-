@@ -19,6 +19,18 @@ const UserSchema = new mongoose.Schema({
     enum: ['user', 'admin'],
     default: "user",
   },
+  likedNotes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Note",
+    }
+  ],
+  favoriteNotes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Note",
+    }
+  ],
 },{
   timestamps: true,
 })

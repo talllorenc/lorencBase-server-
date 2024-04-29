@@ -55,9 +55,6 @@ export const AuthController = {
         {
           UserInfo: {
             _id: user._id,
-            username: user.name,
-            email: user.email,
-            role: user.role,
           },
         },
         jwtSecretKey,
@@ -105,9 +102,6 @@ export const AuthController = {
             {
               UserInfo: {
                 _id: user._id,
-                username: user.name,
-                email: user.email,
-                role: user.role,
               },
             },
             jwtSecretKey,

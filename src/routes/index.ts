@@ -28,8 +28,12 @@ router.patch("/users/:id", UserController.updateUser);
 router.get("/notes", NoteController.getAll); //DONE
 router.get("/notes/:slug", NoteController.getOneBySlug);//DONE
 router.get("/notes/getOneId/:id", NoteController.getOneById);//DONE (ADMIN)
-router.post("/notes", notesValidator, NoteController.create); //DONE
-router.delete("/notes/:id", NoteController.delete); //DONE
+router.post("/notes", checkAuth, notesValidator, NoteController.create); //DONE
+router.delete("/notes/:id", checkAuth, NoteController.delete); //DONE
+router.patch("/notes/:id/like", checkAuth, NoteController.like);//DONE
+router.patch("/notes/:id/unlike", checkAuth, NoteController.unlike);//DONE
+router.patch("/notes/:id/favoriteAdd", checkAuth, NoteController.addToFavorites);
+router.patch("/notes/:id/favoriteRemove", checkAuth, NoteController.removeFromFavorites);
 router.post(
   "/notes/upload/",
   uploadImage.single("image"),

@@ -8,6 +8,10 @@ const NoteSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    description: {
+      type: String,
+      required: true,
+    },
     content: {
       type: [String], 
       required: true, 
@@ -20,11 +24,17 @@ const NoteSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    viewsCount: {
-      type: Number,
-      default: 0,
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      }
+    ],
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
-    likes: {
+    viewsCount: {
       type: Number,
       default: 0,
     },
