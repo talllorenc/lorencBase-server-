@@ -55,15 +55,20 @@ export const AuthController = {
         {
           UserInfo: {
             _id: user._id,
+            role: user.role,
           },
         },
         jwtSecretKey,
         { expiresIn: "10s" }
       );
 
-      const refreshToken = jwt.sign({ _id: user._id }, jwtSecretKeyRefresh, {
-        expiresIn: "7d",
-      });
+      const refreshToken = jwt.sign(
+        { _id: user._id, role: user.role },
+        jwtSecretKeyRefresh,
+        {
+          expiresIn: "7d",
+        }
+      );
 
       res.cookie("jwt", refreshToken, {
         httpOnly: true,
@@ -102,6 +107,7 @@ export const AuthController = {
             {
               UserInfo: {
                 _id: user._id,
+                role: user.role,
               },
             },
             jwtSecretKey,
@@ -117,9 +123,9 @@ export const AuthController = {
     }
   },
   logout: async (req: Request, res: Response) => {
-    const cookies = req.cookies
-    if (!cookies?.jwt) return res.sendStatus(204) 
-    res.clearCookie('jwt', { httpOnly: true, sameSite: 'none', secure: true })
-    res.json({ message: 'Cookie cleared' })
-  }
+    const cookies = req.cookies;
+    if (!cookies?.jwt) return res.sendStatus(204);
+    res.clearCookie("jwt", { httpOnly: true, sameSite: "none", secure: true });
+    res.json({ message: "Cookie cleared" });
+  },
 };
