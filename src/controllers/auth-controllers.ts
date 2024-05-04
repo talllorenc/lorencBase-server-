@@ -37,7 +37,7 @@ export const AuthController = {
     try {
       const { email, password } = req.body;
 
-      const user = await UserModel.findOne({ email });
+      const user = await UserModel.findOne({ email })
 
       if (!user) {
         return res.status(401).json({ message: "Invalid email or password" });
@@ -73,11 +73,11 @@ export const AuthController = {
       res.cookie("jwt", refreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: "none",
+        sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      res.json({ accessToken });
+      res.json({ accessToken, user });
     } catch (error) {
       console.error("Error logging in:", error);
       res.status(500).json({ message: "An error occurred while logging in" });
@@ -99,7 +99,9 @@ export const AuthController = {
         async (err: any, decoded: { _id: string }) => {
           if (err) return res.status(403).json({ message: "Forbidden" });
 
-          const user = await UserModel.findOne({ _id: decoded._id }).exec();
+          const user = await UserModel.findOne({ _id: decoded._id })
+            .select("-passwordHash -createdAt -updatedAt")
+            .exec();
 
           if (!user) return res.status(401).json({ message: "Unauthorized" });
 
@@ -114,7 +116,7 @@ export const AuthController = {
             { expiresIn: "10s" }
           );
 
-          res.json({ accessToken });
+          res.json({ accessToken, user });
         }
       );
     } catch (error) {

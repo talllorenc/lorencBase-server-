@@ -13,8 +13,8 @@ const NoteSchema = new mongoose.Schema(
       required: true,
     },
     content: {
-      type: [String], 
-      required: true, 
+      type: [String],
+      required: true,
     },
     tags: {
       type: [String],
@@ -24,11 +24,16 @@ const NoteSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    category: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-      }
+      },
     ],
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

@@ -12,7 +12,9 @@ interface AuthRequest extends Request {
 export const NoteController = {
   getAll: async (req: Request, res: Response) => {
     try {
-      const notes = await NoteModel.find().lean();
+      console.log(req.query);
+      
+      const notes = await NoteModel.find(req.query).lean();
 
       if (!notes || !notes.length) {
         return res.status(404).json({ message: "Notes not found" });
@@ -62,7 +64,7 @@ export const NoteController = {
   },
   create: async (req: AuthRequest, res: Response) => {
     try {
-      const { data, title, description, tags } = req.body;
+      const { data, title, description, tags, category } = req.body;
 
       const html = edjsParser.parse(data);
 
@@ -74,6 +76,7 @@ export const NoteController = {
         content: html,
         tags,
         slug,
+        category,
         createdBy: req.userId,
       });
 
