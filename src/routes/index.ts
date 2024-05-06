@@ -41,5 +41,6 @@ router.post(
 ); //DONE
 
 router.post("/verify-recaptcha", RecaptchaController.validate); //DONE
+router.get("/search", NoteController.search);
 
 export default router;

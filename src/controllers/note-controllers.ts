@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { NoteModel } from "../models/Note";
 import edjsHTML from "editorjs-html";
 import { UserModel } from "../models/User";
+import { INote } from "types/authTypes";
 
 const edjsParser = edjsHTML();
 
@@ -12,15 +13,23 @@ interface AuthRequest extends Request {
 export const NoteController = {
   getAll: async (req: Request, res: Response) => {
     try {
-      console.log(req.query);
-      
-      const notes = await NoteModel.find(req.query).lean();
+      const page = parseInt(req.query.page as string) || 1; 
+      const limit = parseInt(req.query.perPage as string); 
 
+      const skip = (page - 1) * limit;
+  
+      const conditions = {}; 
+      const totalItems = await NoteModel.countDocuments(conditions);
+      const notes = await NoteModel.find(conditions)
+          .skip(skip)
+          .limit(limit)
+          .lean();
+  
       if (!notes || !notes.length) {
         return res.status(404).json({ message: "Notes not found" });
       }
-
-      res.json(notes);
+  
+      res.json({notes, totalItems});
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Internal server error" });
@@ -96,8 +105,10 @@ export const NoteController = {
         return res.status(404).json({ message: "Note not found" });
       }
 
-      if(note.createdBy.toString() !== req.userId) {
-        return res.status(401).json({ message: "Forbidden. You are not the creator of note" });
+      if (note.createdBy.toString() !== req.userId) {
+        return res
+          .status(401)
+          .json({ message: "Forbidden. You are not the creator of note" });
       }
 
       res.status(200).json({ message: "Note deleted successfully" });
@@ -185,7 +196,7 @@ export const NoteController = {
       const updatedNote = await NoteModel.findOneAndUpdate(
         { _id: noteId },
         {
-          $pull: { likes: userId }, 
+          $pull: { likes: userId },
         },
         {
           new: true,
@@ -195,7 +206,7 @@ export const NoteController = {
       const updatedUser = await UserModel.findOneAndUpdate(
         { _id: userId },
         {
-          $pull: { likedNotes: note._id }, 
+          $pull: { likedNotes: note._id },
         },
         {
           new: true,
@@ -251,7 +262,6 @@ export const NoteController = {
       }
 
       res.status(200).json({ message: "Note added to favorites successfully" });
-
     } catch (error) {
       console.error("Error unliking note:", error);
       return res.status(500).json({ message: "Internal server error" });
@@ -291,7 +301,9 @@ export const NoteController = {
         return res.status(404).json({ message: "User not found" });
       }
 
-      res.status(200).json({ message: "Note removed from favorites successfully" });
+      res
+        .status(200)
+        .json({ message: "Note removed from favorites successfully" });
     } catch (error) {
       console.error("Error unliking note:", error);
       return res.status(500).json({ message: "Internal server error" });
@@ -307,6 +319,21 @@ export const NoteController = {
       });
     } catch (error) {
       console.log(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+  search: async (req: Request, res: Response) => {
+    try {
+      const query = req.query.query?.toString();
+      console.log(query);
+
+      const notes: INote[] = await NoteModel.find({
+        title: { $regex: query, $options: "i" },
+      });
+
+      res.json(notes);
+    } catch (error) {
+      console.error("Error searching notes:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   },
